@@ -77,8 +77,6 @@ app.get('/region/:regiune', async (req, res) => {
 });
 
 app.post('/region', async (req, res) => {
-  let echipe = [];
-  let valabil;
   const queryConstruct = `
   PREFIX : <http://mariavlad.ro#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -86,7 +84,7 @@ app.post('/region', async (req, res) => {
 	{
     BIND (IRI(CONCAT("http://mariavlad.ro#",REPLACE("${req.body.nume}"," ",""))) AS ?idNou)
 		?idNou ?proprietate ?valoare
-	}`
+	}`;
 
   const client = new sparql({ endpointUrl });
   const stream = await client.query.ask(queryConstruct);

@@ -14,17 +14,10 @@ app.use(bodyParser.json());
 app.use(cors());
 let endpointUrl = "http://localhost:8080/rdf4j-server/repositories/grafexamen";
 
-// app.get('/', (req, res) => {
-
-
-
-//   res.send({"message":"buna"});
-// });
-
 app.get('/', async (req, res) => {
   let numeRegiuni = [];
   const query = `
-  PREFIX : <http://dobocanvlad.ro#>
+  PREFIX : <http://mariavlad.ro#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   PREFIX schema: <http://schema.org/>
   SELECT ?nume
@@ -52,7 +45,7 @@ app.get('/', async (req, res) => {
 app.get('/region/:regiune', async (req, res) => {
   let echipe = [];
   const query = `
-  PREFIX : <http://dobocanvlad.ro#>
+  PREFIX : <http://mariavlad.ro#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   SELECT ?nume ?finalist ?nrMembrii ?imagine
   WHERE
@@ -85,33 +78,47 @@ app.get('/region/:regiune', async (req, res) => {
 
 app.post('/region', async (req, res) => {
   let echipe = [];
-
-  console.log(req.body);
-  const query = `
-  PREFIX : <http://dobocanvlad.ro#>
+  let valabil;
+  const queryConstruct = `
+  PREFIX : <http://mariavlad.ro#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-  INSERT DATA
-  {Graph
-  :grafEchipe
-  {
-    :${req.body.nume} :from :${req.body.from};
-                      :finalist ${req.body.finalist};
-                      :nrMembrii ${req.body.nrMembrii};
-                      :img "${req.body.imagine}";
-                      rdfs:label "${req.body.nume}".
-  }}`;
+  ASK
+	{
+    BIND (IRI(CONCAT("http://mariavlad.ro#",REPLACE("${req.body.nume}"," ",""))) AS ?idNou)
+		?idNou ?proprietate ?valoare
+	}`
 
-  try{
-    const updateUrl = endpointUrl + "/statements";
-    const client = new sparql({ updateUrl });
-    const stream = await client.query.update(query);
+  const client = new sparql({ endpointUrl });
+  const stream = await client.query.ask(queryConstruct);
 
+  if(stream){
+    res.send({"eroare": "ID deja existent in graf"});
+  } else {
+    const query = `
+      PREFIX : <http://mariavlad.ro#>
+      INSERT {
+        GRAPH :grafEchipe{
+        ?idNou :from :${req.body.from};
+                              :finalist ${req.body.finalist};
+                              :nrMembrii ${req.body.nrMembrii};
+                              :img "${req.body.imagine}";
+                              rdfs:label "${req.body.nume}".
+        }}
+      WHERE{
+      BIND(REPLACE("${req.body.nume}"," ","") AS ?numeFaraSpatii)
+      BIND(CONCAT("http://mariavlad.ro#",?numeFaraSpatii) AS ?uriString)
+      BIND(IRI(?uriString) AS ?idNou)}`;
+
+    try{
+      const updateUrl = endpointUrl + "/statements";
+      const client = new sparql({ updateUrl });
+      const stream = await client.query.update(query);
       res.status(200).send({"mesaj": "Update efectuat cu succes"});
 
-  } catch(e) {
+    } catch(e) {
       console.log(e);
     }
-  });
+  }});
 
 app.listen(port, () => {
   console.log("Application started");

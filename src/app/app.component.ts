@@ -38,10 +38,18 @@ export class AppComponent implements OnInit{
   }
 
   submit(){
+    if(this.currentRegion == null){
+      alert("Alegeti o regiune!");
+    }
+    else{
     let dataToInsert: Team = this.insertForm.value;
     dataToInsert.from = this.currentRegion;
-    this.httpclient.post("http://localhost:4000/region", dataToInsert).subscribe(res => {
+    this.httpclient.post<any>("http://localhost:4000/region", dataToInsert).subscribe(res => {
       this.filterByRegion(this.currentRegion);
+      if(res.eroare){
+        alert(res.eroare);
+      }
     });
+    }
   }
 }

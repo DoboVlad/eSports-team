@@ -1,8 +1,9 @@
 <div class="container">
   <div class="main-container">
-    <div class="categories">
+    <div class="categories" [ngStyle] = "{'text-align': displayData == false ? 'center' : ''}">
       <h2 class="title">Regiuni</h2>
-      <ul class="list">
+      <button class="buton" (click)="displayRegions()" *ngIf="displayData == false">Display regions</button>
+      <ul class="list" *ngIf="displayData">
         <li class="item-list" *ngFor = "let region of regions" (click)="filterByRegion(region)">{{region}}</li>
       </ul>
     </div>
@@ -11,9 +12,9 @@
       <div class="content" *ngFor = "let echipa of teams">
           <div class="content-data">
             <div class="stergere">
-              <p class="title">{{echipa.nume}}</p>
+              <p class="title" #nume>{{echipa.nume}}</p>
               <div class="buton_div">
-                <button class="buton">Stergere</button>
+                <button class="buton" (click) = "delete(nume)">Stergere</button>
               </div>
             </div>
             <div class="afisare">

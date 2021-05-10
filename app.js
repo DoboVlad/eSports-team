@@ -5,7 +5,7 @@ const sparql = require('sparql-http-client');
 const bodyParser = require('body-parser');
 const port = 4000;
 
-// pentru a prelua elemente din
+// pentru a prelua elemente din body
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
@@ -50,21 +50,23 @@ app.get('/region/:regiune', async (req, res) => {
   SELECT ?nume ?finalist ?nrMembrii ?imagine
   WHERE
   {
-    ?echipa :from :${req.params.regiune}.
-  	?echipa :finalist ?finalist.
-    ?echipa :nrMembrii ?nrMembrii.
-    ?echipa :img ?imagine.
-    ?echipa rdfs:label ?nume
-
+    ?echipa :from :${req.params.regiune};
+  	        :finalist ?finalist;
+            :nrMembrii ?nrMembrii;
+            :img ?imagine;
+            rdfs:label ?nume
   }`;
   const client = new sparql({ endpointUrl });
   const stream = await client.query.select(query);
 
   stream.on('data', row => {
-    echipe.push({"finalist": row.finalist.value,
+    echipe.push(
+    {
+    "finalist": row.finalist.value,
     "nrMembrii":row.nrMembrii.value,
     "imagine": row.imagine.value,
-    "nume":row.nume.value});
+    "nume":row.nume.value
+    });
   });
 
   stream.on('error', err => {
@@ -77,13 +79,14 @@ app.get('/region/:regiune', async (req, res) => {
 });
 
 app.post('/region', async (req, res) => {
+  const newId = req.body.nume.split(" ").join('');
+  console.log(newId);
   const queryConstruct = `
   PREFIX : <http://mariavlad.ro#>
   PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
   ASK
 	{
-    BIND (IRI(CONCAT("http://mariavlad.ro#",REPLACE("${req.body.nume}"," ",""))) AS ?idNou)
-		?idNou ?proprietate ?valoare
+		:${newId} ?proprietate ?valoare
 	}`;
 
   const client = new sparql({ endpointUrl });
@@ -94,29 +97,77 @@ app.post('/region', async (req, res) => {
   } else {
     const query = `
       PREFIX : <http://mariavlad.ro#>
-      INSERT {
+      PREFIX schema: <http://schema.org/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      INSERT DATA{
         GRAPH :grafEchipe{
-        ?idNou :from :${req.body.from};
+          :${newId} :from :${req.body.from};
                               :finalist ${req.body.finalist};
                               :nrMembrii ${req.body.nrMembrii};
                               :img "${req.body.imagine}";
-                              rdfs:label "${req.body.nume}".
-        }}
-      WHERE{
-      BIND(REPLACE("${req.body.nume}"," ","") AS ?numeFaraSpatii)
-      BIND(CONCAT("http://mariavlad.ro#",?numeFaraSpatii) AS ?uriString)
-      BIND(IRI(?uriString) AS ?idNou)}`;
+                              rdfs:label "${req.body.nume}";
+                              a schema:SportsTeam.
+        }}`;
 
     try{
       const updateUrl = endpointUrl + "/statements";
       const client = new sparql({ updateUrl });
       const stream = await client.query.update(query);
-      res.status(200).send({"mesaj": "Update efectuat cu succes"});
+      res.status(200).send({"mesaj": "Inserare efectuata cu succes"});
 
     } catch(e) {
       console.log(e);
     }
   }});
+
+app.post('/delete', async (req, res) => {
+    const newId = req.body.nume.split(" ").join('');
+    const queryConstruct = `
+    PREFIX : <http://mariavlad.ro#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    ASK
+    {
+      :${newId} ?proprietate ?valoare
+    }`;
+
+    const client = new sparql({ endpointUrl });
+    const stream = await client.query.ask(queryConstruct);
+
+    if(!stream){
+      res.send({"eroare": "Echipa nu exista in baza de date"});
+    } else {
+      const query = `
+      PREFIX : <http://mariavlad.ro#>
+      PREFIX schema: <http://schema.org/>
+      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+      DELETE {
+        :${newId} :from ?Region;
+                :finalist ?finalist;
+                :nrMembrii ?nr;
+                :img ?img;
+                rdfs:label ?nume;
+                a schema:SportsTeam.
+      }
+      WHERE
+      {
+        :${newId} :from ?Region;
+                :finalist ?finalist;
+                :nrMembrii ?nr;
+                :img ?img;
+                rdfs:label ?nume;
+                a schema:SportsTeam.
+      }`;
+
+      try{
+        const updateUrl = endpointUrl + "/statements";
+        const client = new sparql({ updateUrl });
+        const stream = await client.query.update(query);
+        res.status(200).send({"mesaj": "Delete efectuat cu succes"});
+
+      } catch(e) {
+        console.log(e);
+      }
+    }});
 
 app.listen(port, () => {
   console.log("Application started");

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit } from '@angular/core';
 import { FormControl, FormGroup, FormGroupName, Validators } from '@angular/forms';
 import {Team} from '../Models/team';
 
@@ -14,6 +14,7 @@ export class AppComponent implements OnInit{
   teams: Team[] = [];
   currentRegion : string;
   insertForm: FormGroup;
+  displayData = false;
 
   constructor(private httpclient: HttpClient) {}
 
@@ -24,7 +25,10 @@ export class AppComponent implements OnInit{
       "nrMembrii": new FormControl(null, Validators.required),
       "finalist": new FormControl(false, Validators.required)
     });
+  }
 
+  displayRegions(){
+    this.displayData = true;
     this.httpclient.get("http://localhost:4000/").subscribe(response => {
       this.regions = response;
     });
@@ -51,5 +55,12 @@ export class AppComponent implements OnInit{
       }
     });
     }
+  }
+
+  delete(nume: HTMLParagraphElement){
+    this.httpclient.post<any>("http://localhost:4000/delete", {nume: nume.textContent}).subscribe(res => {
+      this.filterByRegion(this.currentRegion);
+      alert(res.mesaj);
+    });
   }
 }

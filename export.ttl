@@ -1,0 +1,63 @@
+@prefix : <http://mariavlad.ro#> .
+@prefix schema: <http://schema.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fn: <http://www.w3.org/2005/xpath-functions#> .
+@prefix sesame: <http://www.openrdf.org/schema/sesame#> .
+@prefix rdf4j: <http://rdf4j.org/schema/rdf4j#> .
+
+:G2Esports a schema:SportsTeam;
+  rdfs:label "G2 Esports";
+  :from :Europa;
+  :finalist true;
+  :nrMembrii 6;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2FG2-FullonDark.png" .
+
+:Europa a schema:DefinedRegion;
+  rdfs:label "Europa" .
+
+:Fnatic a schema:SportsTeam;
+  rdfs:label "FNATIC";
+  :from :Europa;
+  :finalist false;
+  :nrMembrii 7;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1592591295307_FnaticFNC-01-FullonDark.png" .
+
+:Cloud9 a schema:SportsTeam;
+  rdfs:label "Cloud 9";
+  :from :America;
+  :finalist false;
+  :nrMembrii 7;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1592590156110_Cloud9C9-01-FullonDark.png" .
+
+:America a schema:DefinedRegion;
+  rdfs:label "America" .
+
+:TeamSoloMid a schema:SportsTeam;
+  rdfs:label "Team SoloMid";
+  :from :America;
+  :finalist false;
+  :nrMembrii 6;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1592590917094_TSMTSM-01-FullonDark.png" .
+
+:FunPlusPhoenix a schema:SportsTeam;
+  rdfs:label "FunPlus Phoenix";
+  :from :China;
+  :finalist true;
+  :nrMembrii 8;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1592591743320_FunPlusPhoenixFPX-01-FullonDark.png" .
+
+:China a schema:DefinedRegion;
+  rdfs:label "China" .
+
+:SKTelecom a schema:SportsTeam;
+  rdfs:label "SK Telecom T1";
+  :from :Coreea;
+  :finalist true;
+  :nrMembrii 6;
+  :img "https://am-a.akamaihd.net/image?resize=400:&f=http%3A%2F%2Fstatic.lolesports.com%2Fteams%2F1592589079394_T1T1-01-FullonDark.png" .
+
+:Coreea a schema:DefinedRegion;
+  rdfs:label "Coreea" .

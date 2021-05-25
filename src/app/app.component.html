@@ -2,7 +2,7 @@
   <div class="main-container">
     <div class="categories" [ngStyle] = "{'text-align': displayData == false ? 'center' : ''}">
       <h2 class="title">Regiuni</h2>
-      <button class="buton" (click)="displayRegions()" *ngIf="displayData == false">Display regions</button>
+      <button class="buton" (click)="displayRegions()" *ngIf="displayData == false">Afisare regiuni</button>
       <ul class="list" *ngIf="displayData">
         <li class="item-list" *ngFor = "let region of regions" (click)="filterByRegion(region)">{{region}}</li>
       </ul>
